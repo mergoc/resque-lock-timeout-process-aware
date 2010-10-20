@@ -29,7 +29,7 @@ module Resque
     #   end
     # end
     #
-    module LockTimeout
+    module LockTimeoutProcessAware
       # @abstract You may override to implement a custom identifier,
       #           you should consider doing this if your job arguments
       #           are many/long or may not cleanly cleanly to strings.
