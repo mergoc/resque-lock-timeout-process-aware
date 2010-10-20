@@ -24,6 +24,8 @@ Gem::Specification.new do |s|
      "VERSION",
      "lib/resque-lock-timeout.rb",
      "lib/resque/plugins/lock_timeout.rb",
+     "pkg/resque-lock-timeout-process-aware-0.1.0.gem",
+     "resque-lock-timeout-process-aware.gemspec",
      "test/lock_test.rb",
      "test/redis-test.conf",
      "test/test_helper.rb",
