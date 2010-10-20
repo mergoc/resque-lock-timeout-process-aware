@@ -19,3 +19,23 @@ YARD::Rake::YardocTask.new :yardoc do |t|
                  '--readme', 'README.md',
                  '--title', 'resque-lock-timeout documentation']
 end
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |gemspec|
+    gemspec.name = "resque-lock-timeout-process-aware"
+    gemspec.summary = "Forf of resque-lock-timeout that checks a saved process id to make sure the process is still running"
+    gemspec.description = ""
+    gemspec.email = "manuel@inakanetworks.com"
+    gemspec.homepage = "http://github.com/mergoc/resque-lock-timeout-process-aware"
+    gemspec.authors = ["Manuel Gomez"]
+  end
+  Jeweler::GemcutterTasks.new
+rescue LoadError
+  puts "Jeweler not available. Install it with: gem install jeweler"
+end
+
+require 'spec/rake/spectask'
+Spec::Rake::SpecTask.new(:spec) do |spec|
+  spec.libs << 'lib' << 'spec'
+  spec.spec_files = FileList['spec/**/*_spec.rb']
+end
