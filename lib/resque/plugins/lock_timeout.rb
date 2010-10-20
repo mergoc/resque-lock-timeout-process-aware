@@ -74,12 +74,14 @@ module Resque
         acquired = false
         lock_key = redis_lock_key(*args)
 
+        key_value  = {:lock_until=>0,:pid=>Process.pid}
+
         unless lock_timeout > 0
           # Acquire without using a timeout.
-          acquired = true if Resque.redis.setnx(lock_key, true)
+          acquired = true if Resque.redis.setnx(lock_key, key_value.to_json)
         else
           # Acquire using the timeout algorithm.
-          acquired, lock_until = acquire_lock_algorithm!(lock_key)
+          acquired, lock_until = acquire_lock_algorithm!(lock_key,key_value)
         end
 
         lock_failed(*args) if !acquired && respond_to?(:lock_failed)
@@ -89,27 +91,42 @@ module Resque
       # Attempts to aquire the lock using a timeout / deadlock algorithm.
       #
       # Locking algorithm: http://code.google.com/p/redis/wiki/SetnxCommand
-      def acquire_lock_algorithm!(lock_key)
+      def acquire_lock_algorithm!(lock_key,key_value)
         now = Time.now.to_i
         lock_until = now + lock_timeout
         acquired = false
 
-        return [true, lock_until] if Resque.redis.setnx(lock_key, lock_until)
-        # Can't acquire the lock, see if it has expired.
-        lock_expiration = Resque.redis.get(lock_key)
-        if lock_expiration && lock_expiration.to_i < now
+        key_value[:lock_until] = lock_until
+
+        return [true, lock_until] if Resque.redis.setnx(lock_key, key_value.to_json)
+        # Can't acquire the lock, see if it has expired or something happend to the process.
+        key_stored = JSON.parse(Resque.redis.get(lock_key))
+        lock_expiration = key_stored[:lock_until]
+        process_id = key_stored[:pid]
+        if (lock_expiration && lock_expiration.to_i < now) && process_alive?(process_id)
           # expired, try to acquire.
-          lock_expiration = Resque.redis.getset(lock_key, lock_until)
+          lock_expiration = JSON.parse (Resque.redis.getset(lock_key, key_value.to_json))[:lock_until]
           if lock_expiration.nil? || lock_expiration.to_i < now
             acquired = true
           end
         else
           # Try once more...
-          acquired = true if Resque.redis.setnx(lock_key, lock_until)
+          acquired = true if Resque.redis.setnx(lock_key, key_value)
         end
 
         [acquired, lock_until]
       end
+
+      # Check for process status
+      def process_alive?(process_id)
+        begin
+           Process::kill 0, process_id
+           true
+         rescue Errno::ESRCH
+           false
+         end
+      end
+
 
       # Release the lock.
       def release_lock!(*args)
