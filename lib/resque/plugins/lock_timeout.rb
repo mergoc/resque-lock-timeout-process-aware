@@ -111,7 +111,7 @@ module Resque
           end
         else
           # Try once more...
-          acquired = true if Resque.redis.setnx(lock_key, key_value)
+          acquired = true if Resque.redis.setnx(lock_key, key_value.to_jso)
         end
 
         [acquired, lock_until]
