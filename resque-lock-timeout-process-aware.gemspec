@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{resque-lock-timeout-process-aware}
-  s.version = "0.1.0"
+  s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Manuel Gomez"]
@@ -22,8 +22,8 @@ Gem::Specification.new do |s|
      "README.md",
      "Rakefile",
      "VERSION",
-     "lib/resque-lock-timeout.rb",
-     "lib/resque/plugins/lock_timeout.rb",
+     "lib/resque-lock-timeout-process-aware.rb",
+     "lib/resque/plugins/lock_timeout_process_aware.rb",
      "pkg/resque-lock-timeout-process-aware-0.1.0.gem",
      "resque-lock-timeout-process-aware.gemspec",
      "test/lock_test.rb",
